@@ -1,43 +1,42 @@
 import { createContext, useState } from "react";
 import main from "../config/gemini";
 
-
 export const Context = createContext();
 
 const ContextProvider = (props) => {
-
-    const [input, setInput] = useState("")
-    const [recentPrompt, setRecentPrompt] = useState("")
-    const [prevPrompt, setPrevPrompt] = useState([])
-    const [showResult, setShowResult] = useState(false)
-    const [loading, setLoading] = useState(false)
-    const [resultData, setResultData] = useState("")
+    const [input, setInput] = useState("");
+    const [recentPrompt, setRecentPrompt] = useState("");
+    const [prevPrompt, setPrevPrompt] = useState([]);
+    const [showResult, setShowResult] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [resultData, setResultData] = useState("");
 
     const delayPara = (index, nextChar, isLast) => {
         setTimeout(function () {
-            setResultData(prev => prev + nextChar);
+            setResultData((prev) => prev + nextChar);
         }, 10 * index);
     };
 
     const newChat = () => {
-        setLoading(false)
-        setShowResult(false)
-    }
+        setLoading(false);
+        setShowResult(false);
+    };
 
     const onSent = async (prompt) => {
         setResultData("");
         setLoading(true);
         setShowResult(true);
         let chunk;
-        if (prompt !== undefined) {
-            chunk = await main(prompt, prevPrompt.length === 0); // ✅ Pass flag
-            setRecentPrompt(prompt)
-        } else {
-            setPrevPrompt(prev => [...prev, input])
-            setRecentPrompt(input)
-            chunk = await main(input, prevPrompt.length === 0);  // ✅ Pass flag
-        }
 
+
+        if (prompt !== undefined) {
+            chunk = await main(prompt, prevPrompt.length === 0);
+            setRecentPrompt(prompt);
+        } else {
+            setPrevPrompt((prev) => [...prev, input]);
+            setRecentPrompt(input);
+            chunk = await main(input, prevPrompt.length === 0);
+        }
 
         // Format markdown
         let formatted = chunk
@@ -46,14 +45,15 @@ const ContextProvider = (props) => {
             .replace(/:\s?/g, ":<br>")
             .replace(/\*/g, "<br>");
 
-        // Simulate typing effect character by character
         for (let i = 0; i < formatted.length; i++) {
             delayPara(i, formatted[i]);
         }
 
+
+
+
         setLoading(false);
     };
-
 
     const contextValue = {
         prevPrompt,
@@ -66,15 +66,12 @@ const ContextProvider = (props) => {
         resultData,
         input,
         setInput,
-        newChat
-    }
+        newChat,
+    };
 
     return (
-        <Context.Provider value={contextValue}>
-            {props.children}
-        </Context.Provider>
-    )
-}
+        <Context.Provider value={contextValue}>{props.children}</Context.Provider>
+    );
+};
 
 export default ContextProvider;
-
