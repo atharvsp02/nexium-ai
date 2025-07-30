@@ -1,5 +1,4 @@
 import { createContext, useState } from "react";
-import main from "../config/gemini";
 
 export const Context = createContext();
 
@@ -11,8 +10,8 @@ const ContextProvider = (props) => {
     const [loading, setLoading] = useState(false);
     const [resultData, setResultData] = useState("");
 
-    const delayPara = (index, nextChar, isLast) => {
-        setTimeout(function () {
+    const delayPara = (index, nextChar) => {
+        setTimeout(() => {
             setResultData((prev) => prev + nextChar);
         }, 10 * index);
     };
@@ -26,33 +25,45 @@ const ContextProvider = (props) => {
         setResultData("");
         setLoading(true);
         setShowResult(true);
-        let chunk;
 
+        let currentPrompt = prompt !== undefined ? prompt : input;
 
-        if (prompt !== undefined) {
-            chunk = await main(prompt, prevPrompt.length === 0);
-            setRecentPrompt(prompt);
-        } else {
+        if (prompt === undefined) {
             setPrevPrompt((prev) => [...prev, input]);
             setRecentPrompt(input);
-            chunk = await main(input, prevPrompt.length === 0);
+        } else {
+            setRecentPrompt(prompt);
         }
 
-        // Format markdown
-        let formatted = chunk
-            .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
-            .replace(/###\s?(.*?)\s*:?(\n|$)/g, "<h3>$1</h3><br>")
-            .replace(/:\s?/g, ":<br>")
-            .replace(/\*/g, "<br>");
+        try {
+            const res = await fetch("/api/gemini", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ prompt: currentPrompt }),
+            });
 
-        for (let i = 0; i < formatted.length; i++) {
-            delayPara(i, formatted[i]);
+            const data = await res.json();
+            let chunk = data.response || "";
+
+            // Markdown -> HTML formatting
+            let formatted = chunk
+                .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+                .replace(/###\s?(.*?)\s*:?(\n|$)/g, "<h3>$1</h3><br>")
+                .replace(/:\s?/g, ":<br>")
+                .replace(/\*/g, "<br>");
+
+            // Typing animation
+            for (let i = 0; i < formatted.length; i++) {
+                delayPara(i, formatted[i]);
+            }
+        } catch (err) {
+            console.error("Error talking to Nexium API:", err);
+            setResultData("❌ Error talking to Nexium AI.");
+        } finally {
+            setLoading(false);
         }
-
-
-
-
-        setLoading(false);
     };
 
     const contextValue = {
@@ -70,7 +81,9 @@ const ContextProvider = (props) => {
     };
 
     return (
-        <Context.Provider value={contextValue}>{props.children}</Context.Provider>
+        <Context.Provider value={contextValue}>
+            {props.children}
+        </Context.Provider>
     );
 };
 
