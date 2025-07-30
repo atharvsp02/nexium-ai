@@ -1,6 +1,4 @@
-// config/gemini.js
-
-async function main(prompt, isFirstMessage) {
+async function main(prompt) {
   const res = await fetch("/api/gemini", {
     method: "POST",
     headers: {
@@ -10,8 +8,8 @@ async function main(prompt, isFirstMessage) {
   });
 
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.detail || "Gemini API call failed");
+    const error = await res.json();
+    throw new Error("Nexium API Error: " + (error.detail || error.error));
   }
 
   const data = await res.json();
