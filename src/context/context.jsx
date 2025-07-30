@@ -30,14 +30,14 @@ const ContextProvider = (props) => {
         setShowResult(true);
         let chunk;
         if (prompt !== undefined) {
-            chunk = await main(prompt)
+            chunk = await main(prompt, prevPrompt.length === 0); // ✅ Pass flag
             setRecentPrompt(prompt)
-        }
-        else {
+        } else {
             setPrevPrompt(prev => [...prev, input])
             setRecentPrompt(input)
-            chunk = await main(input)
+            chunk = await main(input, prevPrompt.length === 0);  // ✅ Pass flag
         }
+
 
         // Format markdown
         let formatted = chunk
