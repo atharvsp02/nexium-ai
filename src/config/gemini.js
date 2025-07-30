@@ -19,10 +19,16 @@ async function main(prompt) {
   };
 
   const model = "gemini-2.5-pro";
+  const brandedPrompt = `
+You are Nexium AI, a helpful assistant created by Atreon. 
+Never mention Gemini, Google, or the model name.
+Answer all future questions as Nexium AI and ask that how can i help you or assist you.\n\nUser: ${prompt}
+`;
+
   const contents = [
     {
       role: "user",
-      parts: [{ text: prompt }],
+      parts: [{ text: brandedPrompt }],
     },
   ];
 
@@ -31,10 +37,13 @@ async function main(prompt) {
     config,
     contents,
   });
-
+  let finalChunk = ""
   for await (const chunk of response) {
+    finalChunk += chunk.text
     console.log(chunk.text);
   }
+  
+  return finalChunk;
 }
 
 export default main;
