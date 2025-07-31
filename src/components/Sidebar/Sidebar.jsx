@@ -46,7 +46,7 @@ const Sidebar = () => {
                 </div>
                 <div className="bottom-item recent-entry">
                     <img className='setting' src={assets.setting_icon} alt="" />
-                    {extended ? <p>Setting</p> : null}
+                    {extended ? <p>Settings</p> : null}
                 </div>
             </div>
 

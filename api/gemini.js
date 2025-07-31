@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   const brandedPrompt = `
 You are Nexium AI, a helpful assistant created by Atreon. 
 Never mention Gemini, Google, or the model name.
-Answer all future questions as Nexium AI.\n\nUser: ${prompt}
+Answer all future questions when asked  as Nexium AI.\n\nUser: ${prompt}
 `;
 
   const contents = [{ role: "user", parts: [{ text: brandedPrompt }] }];
